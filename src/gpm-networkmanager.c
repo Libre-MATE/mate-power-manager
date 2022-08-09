@@ -24,14 +24,14 @@
 #include <config.h>
 #endif
 
-#include <glib.h>
 #include <dbus/dbus-glib.h>
+#include <glib.h>
 
 #include "gpm-networkmanager.h"
 
-#define NM_LISTENER_SERVICE	"org.freedesktop.NetworkManager"
-#define NM_LISTENER_PATH	"/org/freedesktop/NetworkManager"
-#define NM_LISTENER_INTERFACE	"org.freedesktop.NetworkManager"
+#define NM_LISTENER_SERVICE "org.freedesktop.NetworkManager"
+#define NM_LISTENER_PATH "/org/freedesktop/NetworkManager"
+#define NM_LISTENER_INTERFACE "org.freedesktop.NetworkManager"
 
 /**
  * gpm_networkmanager_sleep:
@@ -40,31 +40,27 @@
  *
  * Return value: TRUE if NetworkManager is now sleeping.
  **/
-gboolean
-gpm_networkmanager_sleep (void)
-{
-	DBusGConnection *connection = NULL;
-	DBusGProxy *nm_proxy = NULL;
-	GError *error = NULL;
+gboolean gpm_networkmanager_sleep(void) {
+  DBusGConnection *connection = NULL;
+  DBusGProxy *nm_proxy = NULL;
+  GError *error = NULL;
 
-	connection = dbus_g_bus_get (DBUS_BUS_SYSTEM, &error);
-	if (error) {
-		g_warning ("%s", error->message);
-		g_error_free (error);
-		return FALSE;
-	}
+  connection = dbus_g_bus_get(DBUS_BUS_SYSTEM, &error);
+  if (error) {
+    g_warning("%s", error->message);
+    g_error_free(error);
+    return FALSE;
+  }
 
-	nm_proxy = dbus_g_proxy_new_for_name (connection,
-			NM_LISTENER_SERVICE,
-			NM_LISTENER_PATH,
-			NM_LISTENER_INTERFACE);
-	if (!nm_proxy) {
-		g_warning ("Failed to get name owner");
-		return FALSE;
-	}
-	dbus_g_proxy_call_no_reply (nm_proxy, "sleep", G_TYPE_INVALID);
-	g_object_unref (G_OBJECT (nm_proxy));
-	return TRUE;
+  nm_proxy = dbus_g_proxy_new_for_name(connection, NM_LISTENER_SERVICE,
+                                       NM_LISTENER_PATH, NM_LISTENER_INTERFACE);
+  if (!nm_proxy) {
+    g_warning("Failed to get name owner");
+    return FALSE;
+  }
+  dbus_g_proxy_call_no_reply(nm_proxy, "sleep", G_TYPE_INVALID);
+  g_object_unref(G_OBJECT(nm_proxy));
+  return TRUE;
 }
 
 /**
@@ -74,29 +70,25 @@ gpm_networkmanager_sleep (void)
  *
  * Return value: TRUE if NetworkManager is now awake.
  **/
-gboolean
-gpm_networkmanager_wake (void)
-{
-	DBusGConnection *connection = NULL;
-	DBusGProxy *nm_proxy = NULL;
-	GError *error = NULL;
+gboolean gpm_networkmanager_wake(void) {
+  DBusGConnection *connection = NULL;
+  DBusGProxy *nm_proxy = NULL;
+  GError *error = NULL;
 
-	connection = dbus_g_bus_get (DBUS_BUS_SYSTEM, &error);
-	if (error) {
-		g_warning ("%s", error->message);
-		g_error_free (error);
-		return FALSE;
-	}
+  connection = dbus_g_bus_get(DBUS_BUS_SYSTEM, &error);
+  if (error) {
+    g_warning("%s", error->message);
+    g_error_free(error);
+    return FALSE;
+  }
 
-	nm_proxy = dbus_g_proxy_new_for_name (connection,
-			NM_LISTENER_SERVICE,
-			NM_LISTENER_PATH,
-			NM_LISTENER_INTERFACE);
-	if (!nm_proxy) {
-		g_warning ("Failed to get name owner");
-		return FALSE;
-	}
-	dbus_g_proxy_call_no_reply (nm_proxy, "wake", G_TYPE_INVALID);
-	g_object_unref (G_OBJECT (nm_proxy));
-	return TRUE;
+  nm_proxy = dbus_g_proxy_new_for_name(connection, NM_LISTENER_SERVICE,
+                                       NM_LISTENER_PATH, NM_LISTENER_INTERFACE);
+  if (!nm_proxy) {
+    g_warning("Failed to get name owner");
+    return FALSE;
+  }
+  dbus_g_proxy_call_no_reply(nm_proxy, "wake", G_TYPE_INVALID);
+  g_object_unref(G_OBJECT(nm_proxy));
+  return TRUE;
 }

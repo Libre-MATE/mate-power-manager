@@ -26,18 +26,16 @@
 
 G_BEGIN_DECLS
 
-typedef struct
-{
-	gfloat		 x;
-	gfloat		 y;
-	guint32		 color;
+typedef struct {
+  gfloat x;
+  gfloat y;
+  guint32 color;
 } GpmPointObj;
 
-GpmPointObj	*gpm_point_obj_new		(void);
-GpmPointObj	*gpm_point_obj_copy		(const GpmPointObj	*cobj);
-void		 gpm_point_obj_free		(GpmPointObj		*obj);
+GpmPointObj *gpm_point_obj_new(void);
+GpmPointObj *gpm_point_obj_copy(const GpmPointObj *cobj);
+void gpm_point_obj_free(GpmPointObj *obj);
 
 G_END_DECLS
 
 #endif /* __GPM_POINT_OBJ_H__ */
-

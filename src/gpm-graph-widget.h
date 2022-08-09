@@ -24,66 +24,69 @@
 #define __GPM_GRAPH_WIDGET_H__
 
 #include <gtk/gtk.h>
+
 #include "gpm-point-obj.h"
 
 G_BEGIN_DECLS
 
-#define GPM_TYPE_GRAPH_WIDGET		(gpm_graph_widget_get_type ())
-#define GPM_GRAPH_WIDGET(obj)		(G_TYPE_CHECK_INSTANCE_CAST ((obj), GPM_TYPE_GRAPH_WIDGET, GpmGraphWidget))
-#define GPM_GRAPH_WIDGET_CLASS(obj)	(G_TYPE_CHECK_CLASS_CAST ((obj), GPM_GRAPH_WIDGET, GpmGraphWidgetClass))
-#define GPM_IS_GRAPH_WIDGET(obj)	(G_TYPE_CHECK_INSTANCE_TYPE ((obj), GPM_TYPE_GRAPH_WIDGET))
-#define GPM_IS_GRAPH_WIDGET_CLASS(obj)	(G_TYPE_CHECK_CLASS_TYPE ((obj), EFF_TYPE_GRAPH_WIDGET))
-#define GPM_GRAPH_WIDGET_GET_CLASS	(G_TYPE_INSTANCE_GET_CLASS ((obj), GPM_TYPE_GRAPH_WIDGET, GpmGraphWidgetClass))
+#define GPM_TYPE_GRAPH_WIDGET (gpm_graph_widget_get_type())
+#define GPM_GRAPH_WIDGET(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST((obj), GPM_TYPE_GRAPH_WIDGET, GpmGraphWidget))
+#define GPM_GRAPH_WIDGET_CLASS(obj) \
+  (G_TYPE_CHECK_CLASS_CAST((obj), GPM_GRAPH_WIDGET, GpmGraphWidgetClass))
+#define GPM_IS_GRAPH_WIDGET(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE((obj), GPM_TYPE_GRAPH_WIDGET))
+#define GPM_IS_GRAPH_WIDGET_CLASS(obj) \
+  (G_TYPE_CHECK_CLASS_TYPE((obj), EFF_TYPE_GRAPH_WIDGET))
+#define GPM_GRAPH_WIDGET_GET_CLASS \
+  (G_TYPE_INSTANCE_GET_CLASS((obj), GPM_TYPE_GRAPH_WIDGET, GpmGraphWidgetClass))
 
-#define GPM_GRAPH_WIDGET_LEGEND_SPACING		17
+#define GPM_GRAPH_WIDGET_LEGEND_SPACING 17
 
-typedef struct GpmGraphWidget		GpmGraphWidget;
-typedef struct GpmGraphWidgetClass	GpmGraphWidgetClass;
-typedef struct GpmGraphWidgetPrivate	GpmGraphWidgetPrivate;
+typedef struct GpmGraphWidget GpmGraphWidget;
+typedef struct GpmGraphWidgetClass GpmGraphWidgetClass;
+typedef struct GpmGraphWidgetPrivate GpmGraphWidgetPrivate;
 
 typedef enum {
-	GPM_GRAPH_WIDGET_TYPE_INVALID,
-	GPM_GRAPH_WIDGET_TYPE_PERCENTAGE,
-	GPM_GRAPH_WIDGET_TYPE_FACTOR,
-	GPM_GRAPH_WIDGET_TYPE_TIME,
-	GPM_GRAPH_WIDGET_TYPE_POWER,
-	GPM_GRAPH_WIDGET_TYPE_VOLTAGE,
-	GPM_GRAPH_WIDGET_TYPE_UNKNOWN
+  GPM_GRAPH_WIDGET_TYPE_INVALID,
+  GPM_GRAPH_WIDGET_TYPE_PERCENTAGE,
+  GPM_GRAPH_WIDGET_TYPE_FACTOR,
+  GPM_GRAPH_WIDGET_TYPE_TIME,
+  GPM_GRAPH_WIDGET_TYPE_POWER,
+  GPM_GRAPH_WIDGET_TYPE_VOLTAGE,
+  GPM_GRAPH_WIDGET_TYPE_UNKNOWN
 } GpmGraphWidgetType;
 
 typedef enum {
-	GPM_GRAPH_WIDGET_PLOT_LINE,
-	GPM_GRAPH_WIDGET_PLOT_POINTS,
-	GPM_GRAPH_WIDGET_PLOT_BOTH
+  GPM_GRAPH_WIDGET_PLOT_LINE,
+  GPM_GRAPH_WIDGET_PLOT_POINTS,
+  GPM_GRAPH_WIDGET_PLOT_BOTH
 } GpmGraphWidgetPlot;
 
 /* the different kinds of lines in the key */
 typedef struct {
-	guint32			 color;
-	gchar			*desc;
+  guint32 color;
+  gchar *desc;
 } GpmGraphWidgetKeyData;
 
-struct GpmGraphWidget
-{
-	GtkDrawingArea		 parent;
-	GpmGraphWidgetPrivate	*priv;
+struct GpmGraphWidget {
+  GtkDrawingArea parent;
+  GpmGraphWidgetPrivate *priv;
 };
 
-struct GpmGraphWidgetClass
-{
-	GtkDrawingAreaClass parent_class;
+struct GpmGraphWidgetClass {
+  GtkDrawingAreaClass parent_class;
 };
 
-GType		 gpm_graph_widget_get_type		(void);
-GtkWidget	*gpm_graph_widget_new			(void);
+GType gpm_graph_widget_get_type(void);
+GtkWidget *gpm_graph_widget_new(void);
 
-gboolean	 gpm_graph_widget_data_clear		(GpmGraphWidget		*graph);
-gboolean	 gpm_graph_widget_data_assign		(GpmGraphWidget		*graph,
-							 GpmGraphWidgetPlot	 plot,
-							 GPtrArray		*array);
-gboolean	 gpm_graph_widget_key_data_add		(GpmGraphWidget		*graph,
-							 guint32		 color,
-							 const gchar		*desc);
+gboolean gpm_graph_widget_data_clear(GpmGraphWidget *graph);
+gboolean gpm_graph_widget_data_assign(GpmGraphWidget *graph,
+                                      GpmGraphWidgetPlot plot,
+                                      GPtrArray *array);
+gboolean gpm_graph_widget_key_data_add(GpmGraphWidget *graph, guint32 color,
+                                       const gchar *desc);
 
 G_END_DECLS
 

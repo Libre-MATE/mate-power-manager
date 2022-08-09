@@ -20,12 +20,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "egg-precision.h"
+
+#include <glib.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <glib.h>
-
-#include "egg-precision.h"
 
 /**
  * egg_precision_round_up:
@@ -38,20 +38,17 @@
  * 112, 10	120
  * 100, 10	100
  **/
-gint
-egg_precision_round_up (gfloat value, gint smallest)
-{
-	gfloat division;
-	if (fabs (value) < 0.01)
-		return 0;
-	if (smallest == 0) {
-		g_warning ("divisor zero");
-		return 0;
-	}
-	division = (gfloat) value / (gfloat) smallest;
-	division = ceilf (division);
-	division *= smallest;
-	return (gint) division;
+gint egg_precision_round_up(gfloat value, gint smallest) {
+  gfloat division;
+  if (fabs(value) < 0.01) return 0;
+  if (smallest == 0) {
+    g_warning("divisor zero");
+    return 0;
+  }
+  division = (gfloat)value / (gfloat)smallest;
+  division = ceilf(division);
+  division *= smallest;
+  return (gint)division;
 }
 
 /**
@@ -65,20 +62,17 @@ egg_precision_round_up (gfloat value, gint smallest)
  * 112, 10	110
  * 100, 10	100
  **/
-gint
-egg_precision_round_down (gfloat value, gint smallest)
-{
-	gfloat division;
-	if (fabs (value) < 0.01)
-		return 0;
-	if (smallest == 0) {
-		g_warning ("divisor zero");
-		return 0;
-	}
-	division = (gfloat) value / (gfloat) smallest;
-	division = floorf (division);
-	division *= smallest;
-	return (gint) division;
+gint egg_precision_round_down(gfloat value, gint smallest) {
+  gfloat division;
+  if (fabs(value) < 0.01) return 0;
+  if (smallest == 0) {
+    g_warning("divisor zero");
+    return 0;
+  }
+  division = (gfloat)value / (gfloat)smallest;
+  division = floorf(division);
+  division *= smallest;
+  return (gint)division;
 }
 
 /***************************************************************************
@@ -87,107 +81,103 @@ egg_precision_round_down (gfloat value, gint smallest)
 #ifdef EGG_TEST
 #include "egg-test.h"
 
-void
-egg_precision_test (gpointer data)
-{
-	guint value;
-	EggTest *test = (EggTest *) data;
+void egg_precision_test(gpointer data) {
+  guint value;
+  EggTest *test = (EggTest *)data;
 
-	if (!egg_test_start (test, "EggPrecision"))
-		return;
+  if (!egg_test_start(test, "EggPrecision")) return;
 
-	/************************************************************/
-	egg_test_title (test, "limit precision down 0,10");
-	value = egg_precision_round_down (0, 10);
-	if (value == 0) {
-		egg_test_success (test, "got %i", value);
-	} else {
-		egg_test_failed (test, "precision incorrect (%i)", value);
-	}
+  /************************************************************/
+  egg_test_title(test, "limit precision down 0,10");
+  value = egg_precision_round_down(0, 10);
+  if (value == 0) {
+    egg_test_success(test, "got %i", value);
+  } else {
+    egg_test_failed(test, "precision incorrect (%i)", value);
+  }
 
-	/************************************************************/
-	egg_test_title (test, "limit precision down 4,10");
-	value = egg_precision_round_down (4, 10);
-	if (value == 0) {
-		egg_test_success (test, "got %i", value);
-	} else {
-		egg_test_failed (test, "precision incorrect (%i)", value);
-	}
+  /************************************************************/
+  egg_test_title(test, "limit precision down 4,10");
+  value = egg_precision_round_down(4, 10);
+  if (value == 0) {
+    egg_test_success(test, "got %i", value);
+  } else {
+    egg_test_failed(test, "precision incorrect (%i)", value);
+  }
 
-	/************************************************************/
-	egg_test_title (test, "limit precision down 11,10");
-	value = egg_precision_round_down (11, 10);
-	if (value == 10) {
-		egg_test_success (test, "got %i", value);
-	} else {
-		egg_test_failed (test, "precision incorrect (%i)", value);
-	}
+  /************************************************************/
+  egg_test_title(test, "limit precision down 11,10");
+  value = egg_precision_round_down(11, 10);
+  if (value == 10) {
+    egg_test_success(test, "got %i", value);
+  } else {
+    egg_test_failed(test, "precision incorrect (%i)", value);
+  }
 
-	/************************************************************/
-	egg_test_title (test, "limit precision down 201,2");
-	value = egg_precision_round_down (201, 2);
-	if (value == 200) {
-		egg_test_success (test, "got %i", value);
-	} else {
-		egg_test_failed (test, "precision incorrect (%i)", value);
-	}
+  /************************************************************/
+  egg_test_title(test, "limit precision down 201,2");
+  value = egg_precision_round_down(201, 2);
+  if (value == 200) {
+    egg_test_success(test, "got %i", value);
+  } else {
+    egg_test_failed(test, "precision incorrect (%i)", value);
+  }
 
-	/************************************************************/
-	egg_test_title (test, "limit precision down 100,10");
-	value = egg_precision_round_down (100, 10);
-	if (value == 100) {
-		egg_test_success (test, "got %i", value);
-	} else {
-		egg_test_failed (test, "precision incorrect (%i)", value);
-	}
+  /************************************************************/
+  egg_test_title(test, "limit precision down 100,10");
+  value = egg_precision_round_down(100, 10);
+  if (value == 100) {
+    egg_test_success(test, "got %i", value);
+  } else {
+    egg_test_failed(test, "precision incorrect (%i)", value);
+  }
 
-	/************************************************************/
-	egg_test_title (test, "limit precision up 0,10");
-	value = egg_precision_round_up (0, 10);
-	if (value == 0) {
-		egg_test_success (test, "got %i", value);
-	} else {
-		egg_test_failed (test, "precision incorrect (%i)", value);
-	}
+  /************************************************************/
+  egg_test_title(test, "limit precision up 0,10");
+  value = egg_precision_round_up(0, 10);
+  if (value == 0) {
+    egg_test_success(test, "got %i", value);
+  } else {
+    egg_test_failed(test, "precision incorrect (%i)", value);
+  }
 
-	/************************************************************/
-	egg_test_title (test, "limit precision up 4,10");
-	value = egg_precision_round_up (4, 10);
-	if (value == 10) {
-		egg_test_success (test, "got %i", value);
-	} else {
-		egg_test_failed (test, "precision incorrect (%i)", value);
-	}
+  /************************************************************/
+  egg_test_title(test, "limit precision up 4,10");
+  value = egg_precision_round_up(4, 10);
+  if (value == 10) {
+    egg_test_success(test, "got %i", value);
+  } else {
+    egg_test_failed(test, "precision incorrect (%i)", value);
+  }
 
-	/************************************************************/
-	egg_test_title (test, "limit precision up 11,10");
-	value = egg_precision_round_up (11, 10);
-	if (value == 20) {
-		egg_test_success (test, "got %i", value);
-	} else {
-		egg_test_failed (test, "precision incorrect (%i)", value);
-	}
+  /************************************************************/
+  egg_test_title(test, "limit precision up 11,10");
+  value = egg_precision_round_up(11, 10);
+  if (value == 20) {
+    egg_test_success(test, "got %i", value);
+  } else {
+    egg_test_failed(test, "precision incorrect (%i)", value);
+  }
 
-	/************************************************************/
-	egg_test_title (test, "limit precision up 201,2");
-	value = egg_precision_round_up (201, 2);
-	if (value == 202) {
-		egg_test_success (test, "got %i", value);
-	} else {
-		egg_test_failed (test, "precision incorrect (%i)", value);
-	}
+  /************************************************************/
+  egg_test_title(test, "limit precision up 201,2");
+  value = egg_precision_round_up(201, 2);
+  if (value == 202) {
+    egg_test_success(test, "got %i", value);
+  } else {
+    egg_test_failed(test, "precision incorrect (%i)", value);
+  }
 
-	/************************************************************/
-	egg_test_title (test, "limit precision up 100,10");
-	value = egg_precision_round_up (100, 10);
-	if (value == 100) {
-		egg_test_success (test, "got %i", value);
-	} else {
-		egg_test_failed (test, "precision incorrect (%i)", value);
-	}
+  /************************************************************/
+  egg_test_title(test, "limit precision up 100,10");
+  value = egg_precision_round_up(100, 10);
+  if (value == 100) {
+    egg_test_success(test, "got %i", value);
+  } else {
+    egg_test_failed(test, "precision incorrect (%i)", value);
+  }
 
-	egg_test_end (test);
+  egg_test_end(test);
 }
 
 #endif
-

@@ -19,46 +19,38 @@
  *
  */
 
-#include <glib.h>
-
 #include "gpm-point-obj.h"
+
+#include <glib.h>
 
 /**
  * gpm_point_obj_copy:
  **/
-GpmPointObj *
-gpm_point_obj_copy (const GpmPointObj *cobj)
-{
-	GpmPointObj *obj;
-	obj = g_new0 (GpmPointObj, 1);
-	obj->x = cobj->x;
-	obj->y = cobj->y;
-	obj->color = cobj->color;
-	return obj;
+GpmPointObj *gpm_point_obj_copy(const GpmPointObj *cobj) {
+  GpmPointObj *obj;
+  obj = g_new0(GpmPointObj, 1);
+  obj->x = cobj->x;
+  obj->y = cobj->y;
+  obj->color = cobj->color;
+  return obj;
 }
 
 /**
  * gpm_point_obj_new:
  **/
-GpmPointObj *
-gpm_point_obj_new (void)
-{
-	GpmPointObj *obj;
-	obj = g_new0 (GpmPointObj, 1);
-	obj->x = 0.0f;
-	obj->y = 0.0f;
-	obj->color = 0x0;
-	return obj;
+GpmPointObj *gpm_point_obj_new(void) {
+  GpmPointObj *obj;
+  obj = g_new0(GpmPointObj, 1);
+  obj->x = 0.0f;
+  obj->y = 0.0f;
+  obj->color = 0x0;
+  return obj;
 }
 
 /**
  * gpm_point_obj_free:
  **/
-void
-gpm_point_obj_free (GpmPointObj *obj)
-{
-	if (obj == NULL)
-		return;
-	g_free (obj);
+void gpm_point_obj_free(GpmPointObj *obj) {
+  if (obj == NULL) return;
+  g_free(obj);
 }
-

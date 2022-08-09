@@ -27,11 +27,11 @@
 
 G_BEGIN_DECLS
 
-void 		 gpm_help_display				(const gchar	*link_id);
+void gpm_help_display(const gchar *link_id);
 #ifdef EGG_TEST
-void		 gpm_common_test				(gpointer	 data);
+void gpm_common_test(gpointer data);
 #endif
 
 G_END_DECLS
 
-#endif	/* __GPMCOMMON_H */
+#endif /* __GPMCOMMON_H */
