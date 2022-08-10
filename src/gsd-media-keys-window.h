@@ -25,13 +25,12 @@
 #define MSD_MEDIA_KEYS_WINDOW_H
 
 #include <glib-object.h>
+#include <glib.h>
 #include <gtk/gtk.h>
 
 #include "msd-osd-window.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+G_BEGIN_DECLS
 
 #define MSD_TYPE_MEDIA_KEYS_WINDOW (msd_media_keys_window_get_type())
 #define MSD_MEDIA_KEYS_WINDOW(obj)                               \
@@ -78,8 +77,6 @@ void msd_media_keys_window_set_volume_level(MsdMediaKeysWindow *window,
                                             int level);
 gboolean msd_media_keys_window_is_valid(MsdMediaKeysWindow *window);
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
-#endif
+#endif /* MSD_MEDIA_KEYS_WINDOW_H */

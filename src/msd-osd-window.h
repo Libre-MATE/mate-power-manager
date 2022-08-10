@@ -42,11 +42,10 @@
 #define MSD_OSD_WINDOW_H
 
 #include <glib-object.h>
+#include <glib.h>
 #include <gtk/gtk.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+G_BEGIN_DECLS
 
 /* Alpha value to be used for foreground objects drawn in an OSD window */
 #define MSD_OSD_WINDOW_FG_ALPHA 1.0
@@ -86,8 +85,6 @@ gboolean msd_osd_window_is_composited(MsdOsdWindow *window);
 gboolean msd_osd_window_is_valid(MsdOsdWindow *window);
 void msd_osd_window_update_and_hide(MsdOsdWindow *window);
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS
 
-#endif
+#endif /* MSD_OSD_WINDOW_H */
