@@ -68,12 +68,5 @@ int main(int argc, char **argv) {
   //	gpm_dpms_test (test);
   //	gpm_graph_widget_test (test);
 
-#if 0
-	gpm_proxy_test (test);
-	gpm_hal_manager_test (test);
-	gpm_device_test (test);
-	gpm_device_teststore (test);
-#endif
-
   return (egg_test_finish(test));
 }
