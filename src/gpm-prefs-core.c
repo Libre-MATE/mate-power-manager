@@ -35,7 +35,6 @@
 #define UPOWER_ENABLE_DEPRECATED
 #include <libupower-glib/upower.h>
 
-#include "egg-console-kit.h"
 #include "gpm-brightness.h"
 #include "gpm-common.h"
 #include "gpm-icon-names.h"
@@ -63,7 +62,6 @@ struct GpmPrefsPrivate {
   gboolean can_suspend;
   gboolean can_hibernate;
   GSettings *settings;
-  EggConsoleKit *console;
 };
 
 enum { ACTION_HELP, ACTION_CLOSE, LAST_SIGNAL };
@@ -513,7 +511,6 @@ static void gpm_prefs_init(GpmPrefs *prefs) {
   prefs->priv = gpm_prefs_get_instance_private(prefs);
 
   prefs->priv->client = up_client_new();
-  prefs->priv->console = egg_console_kit_new();
   prefs->priv->settings = g_settings_new(GPM_SETTINGS_SCHEMA);
 
   prefs->priv->can_shutdown = FALSE;
@@ -566,14 +563,6 @@ static void gpm_prefs_init(GpmPrefs *prefs) {
       g_error_free(error);
     }
     g_object_unref(proxy);
-  } else {
-    /* Get values from ConsoleKit */
-    egg_console_kit_can_stop(prefs->priv->console, &prefs->priv->can_shutdown,
-                             NULL);
-    egg_console_kit_can_suspend(prefs->priv->console, &prefs->priv->can_suspend,
-                                NULL);
-    egg_console_kit_can_hibernate(prefs->priv->console,
-                                  &prefs->priv->can_hibernate, NULL);
   }
 
   if (LOGIND_RUNNING()) {
@@ -728,7 +717,6 @@ static void gpm_prefs_finalize(GObject *object) {
 
   g_object_unref(prefs->priv->settings);
   g_object_unref(prefs->priv->client);
-  g_object_unref(prefs->priv->console);
   g_object_unref(prefs->priv->builder);
 
   G_OBJECT_CLASS(gpm_prefs_parent_class)->finalize(object);

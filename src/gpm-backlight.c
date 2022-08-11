@@ -41,7 +41,6 @@
 #include <gtk/gtk.h>
 #include <libupower-glib/upower.h>
 
-#include "egg-console-kit.h"
 #include "gpm-backlight.h"
 #include "gpm-brightness.h"
 #include "gpm-button.h"
@@ -62,7 +61,6 @@ struct GpmBacklightPrivate {
   GpmControl *control;
   GpmDpms *dpms;
   GpmIdle *idle;
-  EggConsoleKit *console;
   gboolean can_dim;
   gboolean system_is_idle;
   GTimer *idle_timer;
@@ -546,11 +544,9 @@ static void idle_changed_cb(GpmIdle *idle, GpmIdleMode mode,
   /* don't dim or undim the screen when the lid is closed */
   if (gpm_button_is_lid_closed(backlight->priv->button)) return;
 
-  /* don't dim or undim the screen unless ConsoleKit/systemd say we are on the
-   * active console */
-  if (!LOGIND_RUNNING() &&
-      !egg_console_kit_is_active(backlight->priv->console)) {
-    g_debug("ignoring as not on active console");
+  /* don't dim or undim the screen unless logind is running */
+  if (!LOGIND_RUNNING()) {
+    g_debug("ignoring as not on active session");
     return;
   }
 
@@ -664,7 +660,6 @@ static void gpm_backlight_finalize(GObject *object) {
   g_object_unref(backlight->priv->button);
   g_object_unref(backlight->priv->idle);
   g_object_unref(backlight->priv->brightness);
-  g_object_unref(backlight->priv->console);
 
   g_return_if_fail(backlight->priv != NULL);
   G_OBJECT_CLASS(gpm_backlight_parent_class)->finalize(object);
@@ -751,9 +746,6 @@ static void gpm_backlight_init(GpmBacklight *backlight) {
   backlight->priv->control = gpm_control_new();
   g_signal_connect(backlight->priv->control, "resume",
                    G_CALLBACK(control_resume_cb), backlight);
-
-  /* Don't do dimming on inactive console */
-  backlight->priv->console = egg_console_kit_new();
 
   /* sync at startup */
   gpm_backlight_brightness_evaluate_and_set(backlight, FALSE, TRUE);

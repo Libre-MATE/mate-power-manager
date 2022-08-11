@@ -46,7 +46,6 @@
 #include <gnome-keyring.h>
 #endif /* WITH_KEYRING */
 
-#include "egg-console-kit.h"
 #include "gpm-common.h"
 #include "gpm-control.h"
 #include "gpm-networkmanager.h"
@@ -116,15 +115,10 @@ static gboolean gpm_control_systemd_shutdown(void) {
  * Shuts down the computer
  **/
 gboolean gpm_control_shutdown(GpmControl *control, GError **error) {
-  gboolean ret;
-  EggConsoleKit *console;
+  gboolean ret = FALSE;
 
   if (LOGIND_RUNNING()) {
     ret = gpm_control_systemd_shutdown();
-  } else {
-    console = egg_console_kit_new();
-    ret = egg_console_kit_stop(console, error);
-    g_object_unref(console);
   }
   return ret;
 }
@@ -184,11 +178,9 @@ gboolean gpm_control_get_lock_policy(GpmControl *control, const gchar *policy) {
  * gpm_control_suspend:
  **/
 gboolean gpm_control_suspend(GpmControl *control, GError **error) {
-  gboolean allowed = FALSE;
   gboolean ret = FALSE;
   gboolean do_lock;
   gboolean nm_sleep;
-  EggConsoleKit *console;
   GpmScreensaver *screensaver;
   guint32 throttle_cookie = 0;
 #ifdef WITH_LIBSECRET
@@ -210,16 +202,7 @@ gboolean gpm_control_suspend(GpmControl *control, GError **error) {
   screensaver = gpm_screensaver_new();
 
   if (!LOGIND_RUNNING()) {
-    console = egg_console_kit_new();
-    egg_console_kit_can_suspend(console, &allowed, NULL);
-    g_object_unref(console);
-
-    if (!allowed) {
-      g_debug("cannot suspend as not allowed from policy");
-      g_set_error_literal(error, GPM_CONTROL_ERROR, GPM_CONTROL_ERROR_GENERAL,
-                          "Cannot suspend");
-      goto out;
-    }
+    goto out;
   }
 
 #ifdef WITH_LIBSECRET
@@ -296,10 +279,6 @@ gboolean gpm_control_suspend(GpmControl *control, GError **error) {
       ret = TRUE;
     }
     g_object_unref(proxy);
-  } else {
-    console = egg_console_kit_new();
-    ret = egg_console_kit_suspend(console, error);
-    g_object_unref(console);
   }
 
   g_debug("emitting resume");
@@ -324,11 +303,9 @@ out:
  * gpm_control_hibernate:
  **/
 gboolean gpm_control_hibernate(GpmControl *control, GError **error) {
-  gboolean allowed = FALSE;
   gboolean ret = FALSE;
   gboolean do_lock;
   gboolean nm_sleep;
-  EggConsoleKit *console;
   GpmScreensaver *screensaver;
   guint32 throttle_cookie = 0;
 #ifdef WITH_LIBSECRET
@@ -350,16 +327,7 @@ gboolean gpm_control_hibernate(GpmControl *control, GError **error) {
   screensaver = gpm_screensaver_new();
 
   if (!LOGIND_RUNNING()) {
-    console = egg_console_kit_new();
-    egg_console_kit_can_hibernate(console, &allowed, NULL);
-    g_object_unref(console);
-
-    if (!allowed) {
-      g_debug("cannot hibernate as not allowed from policy");
-      g_set_error_literal(error, GPM_CONTROL_ERROR, GPM_CONTROL_ERROR_GENERAL,
-                          "Cannot hibernate");
-      goto out;
-    }
+    goto out;
   }
 
 #ifdef WITH_LIBSECRET
@@ -438,10 +406,6 @@ gboolean gpm_control_hibernate(GpmControl *control, GError **error) {
       g_variant_unref(res);
       ret = TRUE;
     }
-  } else {
-    console = egg_console_kit_new();
-    ret = egg_console_kit_hibernate(console, error);
-    g_object_unref(console);
   }
 
   g_debug("emitting resume");
