@@ -72,7 +72,6 @@ GpmControl *gpm_control_new(void);
 gboolean gpm_control_suspend(GpmControl *control, GError **error);
 gboolean gpm_control_hibernate(GpmControl *control, GError **error);
 gboolean gpm_control_shutdown(GpmControl *control, GError **error);
-gboolean gpm_control_get_lock_policy(GpmControl *control, const gchar *policy);
 
 G_END_DECLS
 

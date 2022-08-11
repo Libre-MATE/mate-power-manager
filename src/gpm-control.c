@@ -49,7 +49,6 @@
 #include "gpm-common.h"
 #include "gpm-control.h"
 #include "gpm-networkmanager.h"
-#include "gpm-screensaver.h"
 
 struct GpmControlPrivate {
   GSettings *settings;
@@ -124,65 +123,11 @@ gboolean gpm_control_shutdown(GpmControl *control, GError **error) {
 }
 
 /**
- * gpm_control_get_lock_policy:
- * @control: This class instance
- * @policy: The policy string.
- *
- * This function finds out if we should lock the screen when we do an
- * action. It is required as we can either use the mate-screensaver policy
- * or the custom policy. See the yelp file for more information.
- *
- * Return value: TRUE if we should lock.
- **/
-gboolean gpm_control_get_lock_policy(GpmControl *control, const gchar *policy) {
-  gboolean do_lock;
-  gboolean use_ss_setting;
-  gchar **schemas = NULL;
-  gboolean schema_exists;
-  gint i;
-
-  /* Check if the mate-screensaver schema exists before trying to read
-     the lock setting to prevent crashing. See GNOME bug #651225. */
-  g_settings_schema_source_list_schemas(g_settings_schema_source_get_default(),
-                                        TRUE, &schemas, NULL);
-  schema_exists = FALSE;
-  for (i = 0; schemas[i] != NULL; i++) {
-    if (g_strcmp0(schemas[i], GS_SETTINGS_SCHEMA) == 0) {
-      schema_exists = TRUE;
-      break;
-    }
-  }
-
-  g_strfreev(schemas);
-
-  /* This allows us to over-ride the custom lock settings set
-     with a system default set in mate-screensaver.
-     See bug #331164 for all the juicy details. :-) */
-  use_ss_setting = g_settings_get_boolean(control->priv->settings,
-                                          GPM_SETTINGS_LOCK_USE_SCREENSAVER);
-  if (use_ss_setting && schema_exists) {
-    GSettings *settings_ss;
-    settings_ss = g_settings_new(GS_SETTINGS_SCHEMA);
-    do_lock =
-        g_settings_get_boolean(settings_ss, GS_SETTINGS_PREF_LOCK_ENABLED);
-    g_debug("Using ScreenSaver settings (%i)", do_lock);
-    g_object_unref(settings_ss);
-  } else {
-    do_lock = g_settings_get_boolean(control->priv->settings, policy);
-    g_debug("Using custom locking settings (%i)", do_lock);
-  }
-  return do_lock;
-}
-
-/**
  * gpm_control_suspend:
  **/
 gboolean gpm_control_suspend(GpmControl *control, GError **error) {
   gboolean ret = FALSE;
-  gboolean do_lock;
   gboolean nm_sleep;
-  GpmScreensaver *screensaver;
-  guint32 throttle_cookie = 0;
 #ifdef WITH_LIBSECRET
   gboolean lock_libsecret;
   GCancellable *libsecret_cancellable = NULL;
@@ -198,8 +143,6 @@ gboolean gpm_control_suspend(GpmControl *control, GError **error) {
   GError *dbus_error = NULL;
   GDBusProxy *proxy;
   GVariant *res = NULL;
-
-  screensaver = gpm_screensaver_new();
 
   if (!LOGIND_RUNNING()) {
     goto out;
@@ -242,12 +185,6 @@ gboolean gpm_control_suspend(GpmControl *control, GError **error) {
   }
 #endif /* WITH_KEYRING */
 
-  do_lock = gpm_control_get_lock_policy(control, GPM_SETTINGS_LOCK_ON_SUSPEND);
-  if (do_lock) {
-    throttle_cookie = gpm_screensaver_add_throttle(screensaver, "suspend");
-    gpm_screensaver_lock(screensaver);
-  }
-
   nm_sleep = g_settings_get_boolean(control->priv->settings,
                                     GPM_SETTINGS_NETWORKMANAGER_SLEEP);
   if (nm_sleep) gpm_networkmanager_sleep();
@@ -284,18 +221,11 @@ gboolean gpm_control_suspend(GpmControl *control, GError **error) {
   g_debug("emitting resume");
   g_signal_emit(control, signals[RESUME], 0, GPM_CONTROL_ACTION_SUSPEND);
 
-  if (do_lock) {
-    gpm_screensaver_poke(screensaver);
-    if (throttle_cookie)
-      gpm_screensaver_remove_throttle(screensaver, throttle_cookie);
-  }
-
   nm_sleep = g_settings_get_boolean(control->priv->settings,
                                     GPM_SETTINGS_NETWORKMANAGER_SLEEP);
   if (nm_sleep) gpm_networkmanager_wake();
 
 out:
-  g_object_unref(screensaver);
   return ret;
 }
 
@@ -304,10 +234,7 @@ out:
  **/
 gboolean gpm_control_hibernate(GpmControl *control, GError **error) {
   gboolean ret = FALSE;
-  gboolean do_lock;
   gboolean nm_sleep;
-  GpmScreensaver *screensaver;
-  guint32 throttle_cookie = 0;
 #ifdef WITH_LIBSECRET
   gboolean lock_libsecret;
   GCancellable *libsecret_cancellable = NULL;
@@ -323,8 +250,6 @@ gboolean gpm_control_hibernate(GpmControl *control, GError **error) {
   GError *dbus_error = NULL;
   GDBusProxy *proxy;
   GVariant *res = NULL;
-
-  screensaver = gpm_screensaver_new();
 
   if (!LOGIND_RUNNING()) {
     goto out;
@@ -369,13 +294,6 @@ gboolean gpm_control_hibernate(GpmControl *control, GError **error) {
   }
 #endif /* WITH_KEYRING */
 
-  do_lock =
-      gpm_control_get_lock_policy(control, GPM_SETTINGS_LOCK_ON_HIBERNATE);
-  if (do_lock) {
-    throttle_cookie = gpm_screensaver_add_throttle(screensaver, "hibernate");
-    gpm_screensaver_lock(screensaver);
-  }
-
   nm_sleep = g_settings_get_boolean(control->priv->settings,
                                     GPM_SETTINGS_NETWORKMANAGER_SLEEP);
   if (nm_sleep) gpm_networkmanager_sleep();
@@ -411,18 +329,11 @@ gboolean gpm_control_hibernate(GpmControl *control, GError **error) {
   g_debug("emitting resume");
   g_signal_emit(control, signals[RESUME], 0, GPM_CONTROL_ACTION_HIBERNATE);
 
-  if (do_lock) {
-    gpm_screensaver_poke(screensaver);
-    if (throttle_cookie)
-      gpm_screensaver_remove_throttle(screensaver, throttle_cookie);
-  }
-
   nm_sleep = g_settings_get_boolean(control->priv->settings,
                                     GPM_SETTINGS_NETWORKMANAGER_SLEEP);
   if (nm_sleep) gpm_networkmanager_wake();
 
 out:
-  g_object_unref(screensaver);
   return ret;
 }
 

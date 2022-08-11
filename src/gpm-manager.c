@@ -56,7 +56,6 @@
 #include "gpm-idle.h"
 #include "gpm-kbd-backlight.h"
 #include "gpm-manager.h"
-#include "gpm-screensaver.h"
 #include "gpm-session.h"
 #include "gpm-tray-icon.h"
 #include "gpm-upower.h"
@@ -74,17 +73,12 @@ static void gpm_manager_finalize(GObject *object);
 struct GpmManagerPrivate {
   GpmButton *button;
   GSettings *settings;
-  GpmDpms *dpms;
   GpmIdle *idle;
   GpmControl *control;
-  GpmScreensaver *screensaver;
   GpmTrayIcon *tray_icon;
   GpmEngine *engine;
   GpmBacklight *backlight;
   GpmKbdBacklight *kbd_backlight;
-  guint32 screensaver_ac_throttle_id;
-  guint32 screensaver_dpms_throttle_id;
-  guint32 screensaver_lid_throttle_id;
   guint32 critical_alert_timeout_id;
   ca_proplist *critical_alert_loop_props;
   UpClient *client;
@@ -354,65 +348,6 @@ static void gpm_manager_sync_policy_sleep(GpmManager *manager) {
 }
 
 /**
- * gpm_manager_blank_screen:
- * @manager: This class instance
- *
- * Turn off the backlight of the LCD when we shut the lid, and lock
- * if required. This is required because some laptops do not turn off the
- * LCD backlight when the lid is closed.
- * See http://bugzilla.gnome.org/show_bug.cgi?id=321313
- *
- * Return value: Success.
- **/
-static gboolean gpm_manager_blank_screen(GpmManager *manager,
-                                         GError **noerror) {
-  gboolean do_lock;
-  gboolean ret = TRUE;
-  GError *error = NULL;
-
-  do_lock = gpm_control_get_lock_policy(manager->priv->control,
-                                        GPM_SETTINGS_LOCK_ON_BLANK_SCREEN);
-  if (do_lock) {
-    if (!gpm_screensaver_lock(manager->priv->screensaver))
-      g_debug("Could not lock screen via mate-screensaver");
-  }
-  gpm_dpms_set_mode(manager->priv->dpms, GPM_DPMS_MODE_OFF, &error);
-  if (error) {
-    g_debug("Unable to set DPMS mode: %s", error->message);
-    g_error_free(error);
-    ret = FALSE;
-  }
-  return ret;
-}
-
-/**
- * gpm_manager_unblank_screen:
- * @manager: This class instance
- *
- * Unblank the screen after we have opened the lid of the laptop
- *
- * Return value: Success.
- **/
-static gboolean gpm_manager_unblank_screen(GpmManager *manager,
-                                           GError **noerror) {
-  gboolean do_lock;
-  gboolean ret = TRUE;
-  GError *error = NULL;
-
-  gpm_dpms_set_mode(manager->priv->dpms, GPM_DPMS_MODE_ON, &error);
-  if (error) {
-    g_debug("Unable to set DPMS mode: %s", error->message);
-    g_error_free(error);
-    ret = FALSE;
-  }
-
-  do_lock = gpm_control_get_lock_policy(manager->priv->control,
-                                        GPM_SETTINGS_LOCK_ON_BLANK_SCREEN);
-  if (do_lock) gpm_screensaver_poke(manager->priv->screensaver);
-  return ret;
-}
-
-/**
  * gpm_manager_notify_close:
  **/
 static gboolean gpm_manager_notify_close(GpmManager *manager,
@@ -673,17 +608,11 @@ static gboolean gpm_manager_perform_policy(GpmManager *manager,
     g_debug("doing nothing, reason: %s", reason);
   } else if (policy == GPM_ACTION_POLICY_SUSPEND) {
     gpm_manager_action_suspend(manager, reason);
-
   } else if (policy == GPM_ACTION_POLICY_HIBERNATE) {
     gpm_manager_action_hibernate(manager, reason);
-
-  } else if (policy == GPM_ACTION_POLICY_BLANK) {
-    gpm_manager_blank_screen(manager, NULL);
-
   } else if (policy == GPM_ACTION_POLICY_SHUTDOWN) {
     g_debug("shutting down, reason: %s", reason);
     gpm_control_shutdown(manager->priv->control, NULL);
-
   } else if (policy == GPM_ACTION_POLICY_INTERACTIVE) {
     GpmSession *session;
     g_debug("logout, reason: %s", reason);
@@ -788,108 +717,6 @@ static void gpm_manager_idle_changed_cb(GpmIdle *idle, GpmIdleMode mode,
 }
 
 /**
- * gpm_manager_lid_button_pressed:
- * @manager: This class instance
- * @state: TRUE for closed
- *
- * Does actions when the lid is closed, depending on if we are on AC or
- * battery power.
- **/
-static void gpm_manager_lid_button_pressed(GpmManager *manager,
-                                           gboolean pressed) {
-  if (pressed)
-    gpm_manager_play(manager, GPM_MANAGER_SOUND_LID_CLOSE, FALSE);
-  else
-    gpm_manager_play(manager, GPM_MANAGER_SOUND_LID_OPEN, FALSE);
-
-  if (pressed == FALSE) {
-    /* we turn the lid dpms back on unconditionally */
-    gpm_manager_unblank_screen(manager, NULL);
-    return;
-  }
-
-  if (!manager->priv->on_battery) {
-    g_debug("Performing AC policy");
-    gpm_manager_perform_policy(manager, GPM_SETTINGS_BUTTON_LID_AC,
-                               "The lid has been closed on ac power.");
-    return;
-  }
-
-  g_debug("Performing battery policy");
-  gpm_manager_perform_policy(manager, GPM_SETTINGS_BUTTON_LID_BATT,
-                             "The lid has been closed on battery power.");
-}
-
-static void gpm_manager_update_dpms_throttle(GpmManager *manager) {
-  GpmDpmsMode mode;
-  gpm_dpms_get_mode(manager->priv->dpms, &mode, NULL);
-
-  /* Throttle the manager when DPMS is active since we can't see it anyway */
-  if (mode == GPM_DPMS_MODE_ON) {
-    if (manager->priv->screensaver_dpms_throttle_id != 0) {
-      gpm_screensaver_remove_throttle(
-          manager->priv->screensaver,
-          manager->priv->screensaver_dpms_throttle_id);
-      manager->priv->screensaver_dpms_throttle_id = 0;
-    }
-  } else {
-    /* if throttle already exists then remove */
-    if (manager->priv->screensaver_dpms_throttle_id != 0) {
-      gpm_screensaver_remove_throttle(
-          manager->priv->screensaver,
-          manager->priv->screensaver_dpms_throttle_id);
-    }
-    /* TRANSLATORS: this is the mate-screensaver throttle */
-    manager->priv->screensaver_dpms_throttle_id = gpm_screensaver_add_throttle(
-        manager->priv->screensaver, _("Display DPMS activated"));
-  }
-}
-
-static void gpm_manager_update_ac_throttle(GpmManager *manager) {
-  /* Throttle the manager when we are not on AC power so we don't
-     waste the battery */
-  if (!manager->priv->on_battery) {
-    if (manager->priv->screensaver_ac_throttle_id != 0) {
-      gpm_screensaver_remove_throttle(
-          manager->priv->screensaver,
-          manager->priv->screensaver_ac_throttle_id);
-      manager->priv->screensaver_ac_throttle_id = 0;
-    }
-  } else {
-    /* if throttle already exists then remove */
-    if (manager->priv->screensaver_ac_throttle_id != 0)
-      gpm_screensaver_remove_throttle(
-          manager->priv->screensaver,
-          manager->priv->screensaver_ac_throttle_id);
-    /* TRANSLATORS: this is the mate-screensaver throttle */
-    manager->priv->screensaver_ac_throttle_id = gpm_screensaver_add_throttle(
-        manager->priv->screensaver, _("On battery power"));
-  }
-}
-
-static void gpm_manager_update_lid_throttle(GpmManager *manager,
-                                            gboolean lid_is_closed) {
-  /* Throttle the screensaver when the lid is close since we can't see it anyway
-     and it may overheat the laptop */
-  if (lid_is_closed == FALSE) {
-    if (manager->priv->screensaver_lid_throttle_id != 0) {
-      gpm_screensaver_remove_throttle(
-          manager->priv->screensaver,
-          manager->priv->screensaver_lid_throttle_id);
-      manager->priv->screensaver_lid_throttle_id = 0;
-    }
-  } else {
-    /* if throttle already exists then remove */
-    if (manager->priv->screensaver_lid_throttle_id != 0)
-      gpm_screensaver_remove_throttle(
-          manager->priv->screensaver,
-          manager->priv->screensaver_lid_throttle_id);
-    manager->priv->screensaver_lid_throttle_id = gpm_screensaver_add_throttle(
-        manager->priv->screensaver, _("Laptop lid is closed"));
-  }
-}
-
-/**
  * gpm_manager_button_pressed_cb:
  * @power: The power class instance
  * @type: The button type, e.g. "power"
@@ -919,10 +746,6 @@ static void gpm_manager_button_pressed_cb(GpmButton *button, const gchar *type,
   } else if (g_strcmp0(type, GPM_BUTTON_HIBERNATE) == 0) {
     gpm_manager_perform_policy(manager, GPM_SETTINGS_BUTTON_HIBERNATE,
                                "The hibernate button has been pressed.");
-  } else if (g_strcmp0(type, GPM_BUTTON_LID_OPEN) == 0) {
-    gpm_manager_lid_button_pressed(manager, FALSE);
-  } else if (g_strcmp0(type, GPM_BUTTON_LID_CLOSED) == 0) {
-    gpm_manager_lid_button_pressed(manager, TRUE);
   } else if (g_strcmp0(type, GPM_BUTTON_BATTERY) == 0) {
     message = gpm_engine_get_summary(manager->priv->engine);
     gpm_manager_notify(manager, &manager->priv->notification_general,
@@ -931,17 +754,6 @@ static void gpm_manager_button_pressed_cb(GpmButton *button, const gchar *type,
                        NOTIFY_URGENCY_NORMAL);
     g_free(message);
   }
-
-  /* really belongs in mate-screensaver */
-  if (g_strcmp0(type, GPM_BUTTON_LOCK) == 0)
-    gpm_screensaver_lock(manager->priv->screensaver);
-
-  /* disable or enable the fancy screensaver, as we don't want
-   * this starting when the lid is shut */
-  if (g_strcmp0(type, GPM_BUTTON_LID_CLOSED) == 0)
-    gpm_manager_update_lid_throttle(manager, TRUE);
-  else if (g_strcmp0(type, GPM_BUTTON_LID_OPEN) == 0)
-    gpm_manager_update_lid_throttle(manager, FALSE);
 }
 
 /**
@@ -986,11 +798,6 @@ static void gpm_manager_client_changed_cb(UpClient *client, GParamSpec *pspec,
   g_debug("on_battery: %d", on_battery);
 
   gpm_manager_sync_policy_sleep(manager);
-
-  gpm_manager_update_ac_throttle(manager);
-
-  /* simulate user input, but only when the lid is open */
-  if (!lid_is_closed) gpm_screensaver_poke(manager->priv->screensaver);
 
   if (!on_battery)
     gpm_manager_play(manager, GPM_MANAGER_SOUND_POWER_PLUG, FALSE);
@@ -1675,29 +1482,6 @@ out:
   g_free(message);
 }
 
-/**
- * gpm_manager_dpms_mode_changed_cb:
- * @mode: The DPMS mode, e.g. GPM_DPMS_MODE_OFF
- * @info: This class instance
- *
- * Log when the DPMS mode is changed.
- **/
-static void gpm_manager_dpms_mode_changed_cb(GpmDpms *dpms, GpmDpmsMode mode,
-                                             GpmManager *manager) {
-  g_debug("DPMS mode changed: %d", mode);
-
-  if (mode == GPM_DPMS_MODE_ON)
-    g_debug("dpms on");
-  else if (mode == GPM_DPMS_MODE_STANDBY)
-    g_debug("dpms standby");
-  else if (mode == GPM_DPMS_MODE_SUSPEND)
-    g_debug("suspend");
-  else if (mode == GPM_DPMS_MODE_OFF)
-    g_debug("dpms off");
-
-  gpm_manager_update_dpms_throttle(manager);
-}
-
 /*
  * gpm_manager_reset_just_resumed_cb
  */
@@ -1822,11 +1606,6 @@ static void gpm_manager_init(GpmManager *manager) {
         gpm_manager_systemd_inhibit(manager->priv->systemd_inhibit_proxy);
   }
 
-  /* init to unthrottled */
-  manager->priv->screensaver_ac_throttle_id = 0;
-  manager->priv->screensaver_dpms_throttle_id = 0;
-  manager->priv->screensaver_lid_throttle_id = 0;
-
   manager->priv->critical_alert_timeout_id = 0;
   manager->priv->critical_alert_loop_props = NULL;
 
@@ -1857,9 +1636,6 @@ static void gpm_manager_init(GpmManager *manager) {
   g_signal_connect(manager->priv->button, "button-pressed",
                    G_CALLBACK(gpm_manager_button_pressed_cb), manager);
 
-  /* try and start an interactive service */
-  manager->priv->screensaver = gpm_screensaver_new();
-
   /* try an start an interactive service */
   manager->priv->backlight = gpm_backlight_new();
   if (manager->priv->backlight != NULL) {
@@ -1886,10 +1662,6 @@ static void gpm_manager_init(GpmManager *manager) {
   check_type_cpu = g_settings_get_boolean(manager->priv->settings,
                                           GPM_SETTINGS_IDLE_CHECK_CPU);
   gpm_idle_set_check_cpu(manager->priv->idle, check_type_cpu);
-
-  manager->priv->dpms = gpm_dpms_new();
-  g_signal_connect(manager->priv->dpms, "mode-changed",
-                   G_CALLBACK(gpm_manager_dpms_mode_changed_cb), manager);
 
   /* use the control object */
   g_debug("creating new control instance");
@@ -1926,9 +1698,6 @@ static void gpm_manager_init(GpmManager *manager) {
 
   g_signal_connect(gtk_settings_get_default(), "notify::gtk-icon-theme-name",
                    G_CALLBACK(on_icon_theme_change), manager);
-
-  /* update ac throttle */
-  gpm_manager_update_ac_throttle(manager);
 }
 
 /**
@@ -1967,11 +1736,9 @@ static void gpm_manager_finalize(GObject *object) {
                                        on_icon_theme_change, manager);
 
   g_object_unref(manager->priv->settings);
-  g_object_unref(manager->priv->dpms);
   g_object_unref(manager->priv->idle);
   g_object_unref(manager->priv->engine);
   g_object_unref(manager->priv->tray_icon);
-  g_object_unref(manager->priv->screensaver);
   g_object_unref(manager->priv->control);
   g_object_unref(manager->priv->button);
   g_object_unref(manager->priv->backlight);

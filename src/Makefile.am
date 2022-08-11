@@ -175,8 +175,6 @@ mate_power_manager_SOURCES =				\
 	gpm-manager.c					\
 	gpm-tray-icon.h					\
 	gpm-tray-icon.c					\
-	gpm-screensaver.h				\
-	gpm-screensaver.c				\
 	gpm-session.h					\
 	gpm-session.c					\
 	gpm-networkmanager.h				\
@@ -233,8 +231,6 @@ mate_power_self_test_SOURCES =				\
 	gpm-dpms.c					\
 	gpm-button.h					\
 	gpm-button.c					\
-	gpm-screensaver.h				\
-	gpm-screensaver.c				\
 	gpm-engine.h					\
 	gpm-engine.c					\
 	gpm-phone.h					\

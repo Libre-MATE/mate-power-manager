@@ -29,7 +29,6 @@
 #include <gtk/gtk.h>
 
 #include "egg-test.h"
-#include "gpm-screensaver.h"
 
 /* prototypes */
 void egg_precision_test(EggTest *test);
@@ -68,7 +67,6 @@ int main(int argc, char **argv) {
   gpm_phone_test(test);
   //	gpm_dpms_test (test);
   //	gpm_graph_widget_test (test);
-  //	gpm_screensaver_test (test);
 
 #if 0
 	gpm_proxy_test (test);

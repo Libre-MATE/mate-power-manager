@@ -87,10 +87,6 @@ G_BEGIN_DECLS
 #define GPM_SETTINGS_IDLE_CHECK_CPU "check-type-cpu"
 
 /* lock */
-#define GPM_SETTINGS_LOCK_USE_SCREENSAVER "lock-use-screensaver"
-#define GPM_SETTINGS_LOCK_ON_BLANK_SCREEN "lock-blank-screen"
-#define GPM_SETTINGS_LOCK_ON_SUSPEND "lock-suspend"
-#define GPM_SETTINGS_LOCK_ON_HIBERNATE "lock-hibernate"
 #define GPM_SETTINGS_LOCK_KEYRING_SUSPEND "lock-keyring-suspend"
 #define GPM_SETTINGS_LOCK_KEYRING_HIBERNATE "lock-keyring-hibernate"
 
@@ -134,10 +130,6 @@ G_BEGIN_DECLS
 #define GPM_SETTINGS_INFO_STATS_GRAPH_POINTS "info-stats-graph-points"
 #define GPM_SETTINGS_INFO_PAGE_NUMBER "info-page-number"
 #define GPM_SETTINGS_INFO_LAST_DEVICE "info-last-device"
-
-/* mate-screensaver */
-#define GS_SETTINGS_SCHEMA "org.mate.screensaver"
-#define GS_SETTINGS_PREF_LOCK_ENABLED "lock-enabled"
 
 typedef enum {
   GPM_ICON_POLICY_ALWAYS,

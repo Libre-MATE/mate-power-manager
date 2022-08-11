@@ -29,4 +29,13 @@ To work properly, mate-power-manager requires udevd and upowerd to be running.
 
 MATE Power Manager is a fork of GNOME Power Manager.
 
+Only Xscreensaver is supported. mate-screensaver support was dropped after
+copyright infringements on August 11, 2022.
+
+On Fedora you must uninstall mate-screensaver and enable xscreensaver daemon:
+    sudo dnf remove mate-screensaver
+    sudo sed -i '/mate-screensaver/d' /usr/libexec/xscreensaver-autostart
+    sudo sed -i '/OnlyShowIn/d' /etc/xdg/autostart/xscreensaver-autostart.desktop
+
+
 For more information, please see https://mate-desktop.org/
