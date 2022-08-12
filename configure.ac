@@ -60,6 +60,8 @@ GETTEXT_PACKAGE=AC_PACKAGE_NAME
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE(GETTEXT_PACKAGE, "AC_PACKAGE_NAME", [foo])
 
+AM_CONDITIONAL([USE_NLS], [test "x${USE_NLS}" = "xyes"])
+
 GLIB_GSETTINGS
 
 dnl ----------------------------------------------------------------------------
@@ -252,6 +254,8 @@ Configure summary:
     Building extra applets ......: ${enable_applets}
     Self test support ...........: ${have_tests}
     dbus-1 services dir .........: $DBUS_SERVICES_DIR
+
+    Native Language support .....: $USE_NLS
 "
 if [[ "${prefix}" != "/usr" ]] ; then
 	echo '
