@@ -187,7 +187,9 @@ static void gpm_tray_icon_show_about_cb(GtkMenuItem *item, gpointer data) {
   gtk_show_about_dialog(
       NULL, "program-name", _("Power Manager"), "version", VERSION, "comments",
       _("Power management daemon"), "copyright",
-      _("Copyright \xC2\xA9 2011-2021 MATE developers"), "authors", authors,
+      _("Copyright \xC2\xA9 2011-2021 MATE developers\n"
+        "Copyright \xc2\xa9 2022 Libre MATE"),
+      "authors", authors,
       /* Translators should localize the following string
        * which will be displayed at the bottom of the about
        * box to give credit to the translator(s).
