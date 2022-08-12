@@ -1349,7 +1349,7 @@ int main(int argc, char *argv[]) {
     gtk_combo_box_set_active(GTK_COMBO_BOX(widget), 0);
   else
     gtk_combo_box_set_active(GTK_COMBO_BOX(widget), 1);
-  g_signal_connect(G_OBJECT(widget), "changed",
+  g_signal_connect(widget, "changed",
                    G_CALLBACK(gpm_stats_history_type_combo_changed_cb), NULL);
 
   const char *stats_text[GPM_STATS_LAST_TYPE] = {
@@ -1370,7 +1370,7 @@ int main(int argc, char *argv[]) {
     gtk_combo_box_set_active(GTK_COMBO_BOX(widget), 0);
   else
     gtk_combo_box_set_active(GTK_COMBO_BOX(widget), 3);
-  g_signal_connect(G_OBJECT(widget), "changed",
+  g_signal_connect(widget, "changed",
                    G_CALLBACK(gpm_stats_type_combo_changed_cb), NULL);
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "combobox_history_time"));
@@ -1391,7 +1391,7 @@ int main(int argc, char *argv[]) {
     gtk_combo_box_set_active(GTK_COMBO_BOX(widget), 1);
   else
     gtk_combo_box_set_active(GTK_COMBO_BOX(widget), 2);
-  g_signal_connect(G_OBJECT(widget), "changed",
+  g_signal_connect(widget, "changed",
                    G_CALLBACK(gpm_stats_range_combo_changed), NULL);
 
   client = up_client_new();

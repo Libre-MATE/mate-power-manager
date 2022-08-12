@@ -207,7 +207,7 @@ static void gpm_prefs_setup_action_combo(GpmPrefs *prefs,
 
   array = g_ptr_array_new();
   g_object_set_data(G_OBJECT(widget), "settings_key", (gpointer)gpm_pref_key);
-  g_signal_connect(G_OBJECT(widget), "changed",
+  g_signal_connect(widget, "changed",
                    G_CALLBACK(gpm_prefs_action_combo_changed_cb), prefs);
 
   for (i = 0; actions[i] != -1; i++) {
@@ -309,7 +309,7 @@ static void gpm_prefs_setup_time_combo(GpmPrefs *prefs,
   }
 
   /* connect after set */
-  g_signal_connect(G_OBJECT(widget), "changed",
+  g_signal_connect(widget, "changed",
                    G_CALLBACK(gpm_prefs_action_time_changed_cb), prefs);
 }
 
@@ -362,7 +362,7 @@ static void prefs_setup_ac(GpmPrefs *prefs) {
   g_settings_bind(prefs->priv->settings, GPM_SETTINGS_BRIGHTNESS_AC,
                   gtk_range_get_adjustment(GTK_RANGE(widget)), "value",
                   G_SETTINGS_BIND_DEFAULT);
-  g_signal_connect(G_OBJECT(widget), "format-value",
+  g_signal_connect(widget, "format-value",
                    G_CALLBACK(gpm_prefs_format_percentage_cb), NULL);
 
   /* set up the checkboxes */

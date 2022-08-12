@@ -437,13 +437,13 @@ static void gpm_inhibit_applet_init(GpmInhibitApplet *applet) {
   gtk_widget_show_all(GTK_WIDGET(applet));
 
   /* connect */
-  g_signal_connect(G_OBJECT(applet), "button-press-event",
+  g_signal_connect(applet, "button-press-event",
                    G_CALLBACK(gpm_applet_click_cb), NULL);
 
-  g_signal_connect(G_OBJECT(applet), "size-allocate",
+  g_signal_connect(applet, "size-allocate",
                    G_CALLBACK(gpm_applet_size_allocate_cb), NULL);
 
-  g_signal_connect(G_OBJECT(applet), "destroy",
+  g_signal_connect(applet, "destroy",
                    G_CALLBACK(gpm_applet_destroy_cb), NULL);
 }
 

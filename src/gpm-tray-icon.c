@@ -260,7 +260,7 @@ static guint gpm_tray_icon_add_device(GpmTrayIcon *icon, GtkMenu *menu,
     gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(item), TRUE);
 
     /* set callback and add the menu */
-    g_signal_connect(G_OBJECT(item), "activate",
+    g_signal_connect(item, "activate",
                      G_CALLBACK(gpm_tray_icon_show_info_cb), icon);
     g_object_set_data(G_OBJECT(item), "object-path", (gpointer)object_path);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
@@ -351,7 +351,7 @@ static GtkMenu *gpm_tray_icon_create_menu(GpmTrayIcon *icon) {
   image =
       gtk_image_new_from_icon_name("preferences-system", GTK_ICON_SIZE_MENU);
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), image);
-  g_signal_connect(G_OBJECT(item), "activate",
+  g_signal_connect(item, "activate",
                    G_CALLBACK(gpm_tray_icon_show_preferences_cb), icon);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 
@@ -370,7 +370,7 @@ static GtkMenu *gpm_tray_icon_create_menu(GpmTrayIcon *icon) {
 
   /* about */
   item = gtk_image_menu_item_new_from_stock("gtk-about", NULL);
-  g_signal_connect(G_OBJECT(item), "activate",
+  g_signal_connect(item, "activate",
                    G_CALLBACK(gpm_tray_icon_show_about_cb), icon);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 

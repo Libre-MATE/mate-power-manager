@@ -808,7 +808,7 @@ static void gpm_brightness_update_cache(GpmBrightness *brightness) {
     g_debug("watching ::monitors_changed on %p", gscreen);
     g_object_set_data(G_OBJECT(gscreen), "gpk-set-monitors-changed",
                       (gpointer) "true");
-    g_signal_connect(G_OBJECT(gscreen), "monitors_changed",
+    g_signal_connect(gscreen, "monitors_changed",
                      G_CALLBACK(gpm_brightness_monitors_changed), brightness);
   }
 

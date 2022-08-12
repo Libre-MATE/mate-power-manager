@@ -611,7 +611,7 @@ static void gpm_applet_create_popup(GpmBrightnessApplet *applet) {
   gtk_range_set_inverted(GTK_RANGE(applet->slider), TRUE);
   gtk_scale_set_draw_value(GTK_SCALE(applet->slider), FALSE);
   gtk_range_set_value(GTK_RANGE(applet->slider), applet->level);
-  g_signal_connect(G_OBJECT(applet->slider), "value-changed",
+  g_signal_connect(applet->slider, "value-changed",
                    G_CALLBACK(gpm_applet_slide_cb), applet);
 
   /* minus button */
@@ -619,14 +619,14 @@ static void gpm_applet_create_popup(GpmBrightnessApplet *applet) {
       gtk_button_new_with_label("\342\210\222"); /* U+2212 MINUS SIGN */
   gtk_button_set_relief(GTK_BUTTON(applet->btn_minus), GTK_RELIEF_NONE);
   gtk_widget_set_can_focus(applet->btn_minus, FALSE);
-  g_signal_connect(G_OBJECT(applet->btn_minus), "pressed",
+  g_signal_connect(applet->btn_minus, "pressed",
                    G_CALLBACK(gpm_applet_minus_cb), applet);
 
   /* plus button */
   applet->btn_plus = gtk_button_new_with_label("+");
   gtk_button_set_relief(GTK_BUTTON(applet->btn_plus), GTK_RELIEF_NONE);
   gtk_widget_set_can_focus(applet->btn_plus, FALSE);
-  g_signal_connect(G_OBJECT(applet->btn_plus), "pressed",
+  g_signal_connect(applet->btn_plus, "pressed",
                    G_CALLBACK(gpm_applet_plus_cb), applet);
 
   /* box */
@@ -651,10 +651,10 @@ static void gpm_applet_create_popup(GpmBrightnessApplet *applet) {
   gtk_container_add(GTK_CONTAINER(applet->popup), frame);
 
   /* window events */
-  g_signal_connect(G_OBJECT(applet->popup), "button-press-event",
+  g_signal_connect(applet->popup, "button-press-event",
                    G_CALLBACK(on_popup_button_press), applet);
 
-  g_signal_connect(G_OBJECT(applet->popup), "key-press-event",
+  g_signal_connect(applet->popup, "key-press-event",
                    G_CALLBACK(gpm_applet_key_press_cb), applet);
 
   /* Set volume control frame, slider and toplevel window to follow panel volume
@@ -987,10 +987,10 @@ static void gpm_brightness_applet_init(GpmBrightnessApplet *applet) {
   gpm_applet_draw_cb(applet);
 
   /* connect */
-  g_signal_connect(G_OBJECT(applet), "button-press-event",
+  g_signal_connect(applet, "button-press-event",
                    G_CALLBACK(gpm_applet_popup_cb), NULL);
 
-  g_signal_connect(G_OBJECT(applet), "scroll-event",
+  g_signal_connect(applet, "scroll-event",
                    G_CALLBACK(gpm_applet_scroll_cb), NULL);
 
   /* We use g_signal_connect_after because letting the panel draw
@@ -999,20 +999,20 @@ static void gpm_brightness_applet_init(GpmBrightnessApplet *applet) {
   g_signal_connect_after(G_OBJECT(applet), "draw",
                          G_CALLBACK(gpm_applet_draw_cb), NULL);
 
-  g_signal_connect(G_OBJECT(applet), "change-background",
+  g_signal_connect(applet, "change-background",
                    G_CALLBACK(gpm_applet_change_background_cb), NULL);
 
-  g_signal_connect(G_OBJECT(applet), "change-orient",
+  g_signal_connect(applet, "change-orient",
                    G_CALLBACK(gpm_applet_draw_cb), NULL);
 
-  g_signal_connect(G_OBJECT(applet), "change-orient",
+  g_signal_connect(applet, "change-orient",
                    G_CALLBACK(gpm_applet_destroy_popup_cb), NULL);
 
-  g_signal_connect(G_OBJECT(applet), "destroy",
+  g_signal_connect(applet, "destroy",
                    G_CALLBACK(gpm_applet_destroy_cb), NULL);
 
   /* prevent scroll events from reaching the tooltip */
-  g_signal_connect(G_OBJECT(applet), "event-after",
+  g_signal_connect(applet, "event-after",
                    G_CALLBACK(gpm_applet_stop_scroll_events_cb), NULL);
 
   g_signal_connect(gtk_icon_theme_get_default(), "changed",
