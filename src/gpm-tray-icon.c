@@ -408,7 +408,7 @@ static void gpm_tray_icon_popup_menu(GpmTrayIcon *icon, guint32 timestamp) {
   gtk_menu_popup(GTK_MENU(menu), NULL, NULL, gtk_status_icon_position_menu,
                  icon->priv->status_icon, 1, timestamp);
 
-  g_signal_connect(GTK_WIDGET(menu), "hide",
+  g_signal_connect(menu, "hide",
                    G_CALLBACK(gpm_tray_icon_popup_cleared_cd), icon);
 }
 
