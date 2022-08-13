@@ -36,6 +36,3 @@ On Fedora you must uninstall mate-screensaver and enable xscreensaver daemon:
     sudo dnf remove mate-screensaver
     sudo sed -i '/mate-screensaver/d' /usr/libexec/xscreensaver-autostart
     sudo sed -i '/OnlyShowIn/d' /etc/xdg/autostart/xscreensaver-autostart.desktop
-
-
-For more information, please see https://mate-desktop.org/
