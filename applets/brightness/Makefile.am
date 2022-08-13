@@ -44,7 +44,7 @@ $(applet_DATA): $(applet_in_files)
 	$(AM_V_GEN) $(MSGFMT) --desktop --keyword=Name --keyword=Description --template $< -d $(top_srcdir)/po -o $@
 
 $(applet_in_files): $(applet_in_files).in
-	$(AM_V_GEN) sed \
+	$(AM_V_GEN)$(SED) \
             -e "s|\@LIBEXECDIR\@|$(libexecdir)|" \
             -e "s|\@VERSION\@|$(PACKAGE_VERSION)|" \
             $< > $@
@@ -54,7 +54,7 @@ service_in_files = org.mate.panel.applet.BrightnessAppletFactory.service.in
 service_DATA     = $(service_in_files:.service.in=.service)
 
 org.mate.panel.applet.BrightnessAppletFactory.service: $(service_in_files)
-	$(AM_V_GEN)sed \
+	$(AM_V_GEN)$(SED) \
             -e "s|\@LIBEXECDIR\@|$(libexecdir)|" \
             $< > $@
 

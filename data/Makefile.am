@@ -19,7 +19,9 @@ service_in_files = org.mate.PowerManager.service.in
 service_DATA     = $(service_in_files:.service.in=.service)
 
 $(service_DATA): $(service_in_files) Makefile
-	@sed -e "s|\@servicedir\@|$(bindir)|" $< > $@
+	$(AM_V_GEN)$(SED) \
+		-e "s|\@servicedir\@|$(bindir)|" \
+		$< > $@
 
 @GSETTINGS_RULES@
 gsettings_schemas_in_files = org.mate.power-manager.gschema.xml.in
