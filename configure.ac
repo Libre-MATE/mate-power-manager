@@ -1,6 +1,7 @@
 AC_INIT([mate-power-manager], [1.26.0], [https://github.com/Libre-MATE/mate-power-manager/pulls],
         [mate-power-manager], [https://github.com/Libre-MATE/mate-power-manager])
 AC_PREREQ(2.63)
+AC_COPYRIGHT([Copyright (C) 2022 Libre MATE])
 AC_CONFIG_SRCDIR(src)
 AM_INIT_AUTOMAKE([1.9 no-dist-gzip dist-xz check-news tar-ustar])
 AC_CONFIG_HEADERS([config.h])
