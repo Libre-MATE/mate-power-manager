@@ -20,12 +20,9 @@ AC_INIT([mate-power-manager], [1.26.0], [https://github.com/Libre-MATE/mate-powe
 AC_PREREQ(2.63)
 AC_COPYRIGHT([Copyright (C) 2022 Libre MATE])
 AC_CONFIG_SRCDIR(src)
-AM_INIT_AUTOMAKE([1.9 no-dist-gzip dist-xz check-news tar-ustar])
+AM_INIT_AUTOMAKE([1.11 no-dist-gzip dist-xz tar-ustar silent-rules check-news])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
-
-# enable nice build output on automake1.11
-m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 
 MATE_DEBUG_CHECK([no])
 MATE_COMPILE_WARNINGS
