@@ -18,11 +18,10 @@ which mate-autogen || {
 }
 
 which yelp-build || {
-    echo "You need to install yelp-tools" 
+    echo "You need to install yelp-tools"
     exit 1
 }
 
-REQUIRED_AUTOMAKE_VERSION=1.9
 MATE_DATADIR="$mate_datadir"
 
 . mate-autogen
