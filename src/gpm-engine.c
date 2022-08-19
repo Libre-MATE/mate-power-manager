@@ -518,8 +518,7 @@ static gboolean gpm_engine_coldplug_idle_cb(GpmEngine *engine) {
     g_ptr_array_unref(array);
   }
 
-  /* never repeat */
-  return FALSE;
+  return G_SOURCE_REMOVE;
 }
 
 /**
