@@ -510,11 +510,14 @@ static gboolean gpm_engine_coldplug_idle_cb(GpmEngine *engine) {
 
   /* add to database */
   array = up_client_get_devices2(engine->priv->client);
-  for (i = 0; i < array->len; i++) {
-    device = g_ptr_array_index(array, i);
-    gpm_engine_device_add(engine, device);
+  if (array != NULL) {
+    for (i = 0; i < array->len; i++) {
+      device = g_ptr_array_index(array, i);
+      gpm_engine_device_add(engine, device);
+    }
+    g_ptr_array_unref(array);
   }
-  if (array != NULL) g_ptr_array_unref(array);
+
   /* never repeat */
   return FALSE;
 }
